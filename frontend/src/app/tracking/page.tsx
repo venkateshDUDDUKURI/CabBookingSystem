@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/stores/booking-store";
 import { formatCurrency } from "@/lib/utils";
@@ -32,12 +32,16 @@ export default function TrackingPage() {
   const [driverEta, setDriverEta] = useState(5);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
+  const simulationStarted = useRef(false);
 
   useEffect(() => {
     if (!currentRide) {
       router.push("/book");
       return;
     }
+
+    if (simulationStarted.current) return;
+    simulationStarted.current = true;
 
     const stageTimers = [3000, 4000, 5000, 8000];
     let currentIndex = 0;
