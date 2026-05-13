@@ -32,16 +32,22 @@ export default function TrackingPage() {
   const [driverEta, setDriverEta] = useState(5);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
-  const simulationStarted = useRef(false);
+
+  const routerRef = useRef(router);
+  const updateRideStatusRef = useRef(updateRideStatus);
+  const currentRideRef = useRef(currentRide);
 
   useEffect(() => {
-    if (!currentRide) {
-      router.push("/book");
+    routerRef.current = router;
+    updateRideStatusRef.current = updateRideStatus;
+    currentRideRef.current = currentRide;
+  });
+
+  useEffect(() => {
+    if (!currentRideRef.current) {
+      routerRef.current.push("/book");
       return;
     }
-
-    if (simulationStarted.current) return;
-    simulationStarted.current = true;
 
     const stageTimers = [3000, 4000, 5000, 8000];
     let currentIndex = 0;
@@ -51,7 +57,9 @@ export default function TrackingPage() {
         currentIndex++;
         setStageIndex(currentIndex);
         const stage = RIDE_STAGES[currentIndex];
-        updateRideStatus(stage.status as Parameters<typeof updateRideStatus>[0]);
+        updateRideStatusRef.current(
+          stage.status as Parameters<typeof updateRideStatus>[0]
+        );
 
         if (stage.status === "confirmed") {
           toast.success("Driver Rajesh Kumar assigned!");
@@ -76,7 +84,8 @@ export default function TrackingPage() {
     return () => {
       timeouts.forEach(clearTimeout);
     };
-  }, [currentRide, router, updateRideStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (stageIndex >= 2) return;
